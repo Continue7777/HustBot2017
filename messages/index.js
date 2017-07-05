@@ -314,7 +314,7 @@ bot.dialog('leadDuty',
   // session.endDialog();
 }).triggerAction({
   matches: 'leadDuty'
-});
+}); 
 
 //校长上届问题
 bot.dialog('schoolmaster', function (session, args) {

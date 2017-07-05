@@ -189,7 +189,7 @@ bot.dialog('leaderName', function (session, args) {
   var string = '';
   var academicStr = '';
   var postStr = '';
-  fs.readFile('./data/人员数据总.csv', function (err, data) {
+  fs.readFile(path.join(__dirname,'./data/人员数据总.csv'), function (err, data) {
       var table = new Array();
       if (err) {
           console.log(err.stack);

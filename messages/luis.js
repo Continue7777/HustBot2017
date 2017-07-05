@@ -130,7 +130,9 @@ bot.dialog('leadTelEm', function (session, args) {
       }
       //根据csv文件，进行匹配
       ConvertToTable(data, function (table) {
-          if( academicEntitys.length != 0 && postStr.length!=0){
+          console.log(academicEntitys.length);
+          console.log(postStr.length);
+          if( academicEntitys.length != 0 && postEntitys.length!=0){
             academicStr = academicEntitys[0].resolution.values[0].replace(/\s+/g, '');
             postStr = postEntitys[0].resolution.values[0].replace(/\s+/g, '');
             for(var i=0;i<table.length;i++){
@@ -183,26 +185,34 @@ bot.dialog('leaderName', function (session, args) {
           console.log(err.stack);
           return;
       }
-      //根据csv文件，进行匹配
+           //根据csv文件，进行匹配
        ConvertToTable(data, function (table) {
-          for(var i=0;i<table.length;i++){
-            console.log(academicEntitys);
-            console.log(academicEntitys[0].resolution.values[0]);
-            academicStr = academicEntitys[0].resolution.values[0].replace(/\s+/g, '');
-            postStr = postEntitys[0].entity.replace(/\s+/g, '');
-            //console.log(table[i][1].match(academicStr));
-            // console.log(table[i][0]);
-            // console.log(table[i][1]);
-            if (table[i][1] == academicStr && table[i][2] == postStr)
-            {
-              if(table[i][0] != 'None'){
-                string = table[i][1] + "的" + table[i][2] + "是" + table[i][0];
-              }
-              else{
-                string = table[i][1] + "的" + table[i][2] + ",官网没有他的姓名信息";
-              }
-              session.send(string);
+          if( academicEntitys.length != 0 && postEntitys.length!=0){
+            for(var i=0;i<table.length;i++){
+                console.log(academicEntitys);
+                console.log(academicEntitys[0].resolution.values[0]);
+
+                academicStr = academicEntitys[0].resolution.values[0].replace(/\s+/g, '');
+                postStr = postEntitys[0].entity.replace(/\s+/g, '');
+                //console.log(table[i][1].match(academicStr));
+                // console.log(table[i][0]);
+                // console.log(table[i][1]);
+                if (table[i][1] == academicStr && table[i][2] == postStr)
+                {
+                  if(table[i][0] != 'None'){
+                    string = table[i][1] + "的" + table[i][2] + "是" + table[i][0];
+                  }
+                  else{
+                    string = table[i][1] + "的" + table[i][2] + ",官网没有他的姓名信息";
+                  }
+                  session.send(string);
+                }
+              } 
             }
+          else if(academicEntitys.length == 0 && postEntitys.length!=0){
+            session.send('您这是要查学校人员的信息吧。');
+          }else{
+            session.send("请给的信息不足，请告诉我更完整的信息");
           }
       })
   }); 

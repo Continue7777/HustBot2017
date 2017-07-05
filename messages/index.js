@@ -62,7 +62,7 @@ bot.dialog('count', function (session, args) {
     if(academicEntitys.length ==0)
     {
         // 创建可读流 
-        var readerStream = fs.createReadStream('./data/num.txt');
+        var readerStream = fs.createReadStream(path.join(__dirname,'./data/num.txt'));
         // 设置编码为 utf8。
         readerStream.setEncoding('UTF8');
         // 处理流事件 --> data, end, and error

@@ -24,11 +24,6 @@ var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure
 // var bot = new builder.UniversalBot(connector);
 var bot = new builder.UniversalBot(connector, function (session) {
   session.send("啥是"+session.message.text);
-    session.send('count question');
-    session.send(__dirname);
-      fs.exists(path.join(__dirname,'./data/num.txt'), function(exists) {  
-    session.send(exists ? "路径对的" : "wrong");  
-      });
 });
 //bot.localePath(path.join(__dirname, './locale'));
 
@@ -56,56 +51,82 @@ bot.recognizer(recognizer);
 //有关数量的问题
 bot.dialog('count', function (session, args) {
     // retrieve hotel name from matched entities
-    console.log('count question');
-    console.log(__dirname);
-    console.log(process.cwd());
-    var Entitys = builder.EntityRecognizer.findAllEntities(args.intent.entities, 'numKey');
+    var numKeyEntitys = builder.EntityRecognizer.findAllEntities(args.intent.entities, 'numKey');
+    var academicEntitys = builder.EntityRecognizer.findAllEntities(args.intent.entities, 'academic');
     var bestScore = 0;
     var tempScore = 0;
     var bestSentence = '';
     var data = '';
-  // 创建可读流 
-  var readerStream = fs.createReadStream(path.join(__dirname,'./data/num.txt'));
-  // 设置编码为 utf8。
-  readerStream.setEncoding('UTF8');
-  // 处理流事件 --> data, end, and error
-  readerStream.on('data', function(sentence) {
-    data += sentence;
-    console.log(data);
-  });
-  readerStream.on('end',function(){
-    session.send('read the file already');
-    var arr = data.split('\n');
-    var tempStr = '';
-    tempScore = 0;
-    for(var i=0;i<arr.length;i++){
-      for(var j=0;j< args.intent.entities.length;j++){
-        tempStr = args.intent.entities[j].entity.replace(/\s+/g, '');
-        if(arr[i].match(tempStr) != null){
-          tempScore += 1;
+    var tempStr = ''
+    //如果不是问的学校有关的信息，返回学院的官网
+    if(academicEntitys.length ==0)
+    {
+        // 创建可读流 
+        var readerStream = fs.createReadStream('./data/num.txt');
+        // 设置编码为 utf8。
+        readerStream.setEncoding('UTF8');
+        // 处理流事件 --> data, end, and error
+        readerStream.on('data', function(sentence) {
+          data += sentence;
+        });
+        readerStream.on('end',function(){
+          var arr = data.split('\n');
+          var tempStr = '';
+          tempScore = 0;
+          for(var i=0;i<arr.length;i++){
+            for(var j=0;j< numKeyEntitys.length;j++){
+              tempStr = numKeyEntitys[j].entity.replace(/\s+/g, '');
+              if(arr[i].match(tempStr) != null){
+                tempScore += 1;
+              }
+            }
+            tempScore = tempScore / arr[i].length;
+            if (tempScore > bestScore){
+              bestScore = tempScore;
+              bestSentence = arr[i];
+              console.log(tempScore);
+            }
+          }
+          if(bestScore == 0){
+          session.send("这个关于数量的问题没有答案");
+        }else{
+          session.send(bestSentence);
         }
-      }
-      
-      tempScore = tempScore / arr[i].length;
-      if (tempScore > bestScore){
-        bestScore = tempScore;
-        bestSentence = arr[i];
-        console.log(tempScore);
-      }
-    }
-    if(bestScore == 0){
-     session.send("没有这个问题的答案");
-   }else{
-     session.send(bestSentence);
-   }
- });
+      });
 
-  readerStream.on("close", function() {
-      console.log("文件被关闭。");
-  });
-  readerStream.on("error", function() {
-      console.log("读取文件失败。");
-  });
+        readerStream.on("close", function() {
+            console.log("文件被关闭。");
+        });
+        readerStream.on("error", function() {
+            console.log("读取文件失败。");
+        });
+    }
+    else{
+      tempStr = '由于本Bot没有统计到各个学院的数量信息，下面给出您想了解学院的官网'+'\n';
+      //获取官网列表
+      var table = new Array();
+      fs.readFile('./data/website.csv', function (err, data) {
+        if (err) {
+            console.log(err.stack);
+            return;
+        }
+        //根据csv文件，进行匹配
+        ConvertToTable(data, function (table) {
+          for(var i=0;i<academicEntitys.length;i++){
+            tempStr += academicEntitys[i].resolution.values[0].replace(/\s+/g, '') + "的官网是：";
+            console.log(table+"1");
+            for(var j=0;j<table.length;j++){
+              console.log(table[0][0]);
+              if(academicEntitys[i].resolution.values[0].replace(/\s+/g, '') == table[j][0]){
+                tempStr += table[j][1];
+              }
+            }
+          }
+         session.send(tempStr);
+        }); 
+      });
+    }
+
   session.endDialog();
 }).triggerAction({
   matches: 'count'

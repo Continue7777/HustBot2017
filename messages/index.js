@@ -87,8 +87,14 @@ bot.dialog('count', function (session, args) {
    }else{
      session.send(bestSentence);
    }
-
  });
+
+  readerStream.on("close", function() {
+      console.log("文件被关闭。");
+  });
+  readerStream.on("error", function() {
+      console.log("读取文件失败。");
+  });
   session.endDialog();
 }).triggerAction({
   matches: 'count'

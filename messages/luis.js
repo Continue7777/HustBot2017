@@ -18,7 +18,7 @@ var connector = new builder.ChatConnector({
 server.post('/api/messages', connector.listen());
 // This bot enables users to either make a dinner reservation or order dinner.
 var bot = new builder.UniversalBot(connector, function (session) {
-  session.send("Hi... I'm a sample bot.");
+  session.send("你好，我是HUST Bot ,我还很蠢，不要问有难度的问题，好不啦~ ^_^");
   //获取全局变量，为了上下文。
 
   globalAcademic = null;
@@ -30,8 +30,8 @@ var model = 'https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/d91b5656-
 var recognizer = new builder.LuisRecognizer(model);
 bot.recognizer(recognizer);
 
-var globalAcademic = '';
-var globalPost = '';
+var globalAcademic = null;
+var globalPost = null;
 
 //有关数量的问题
 bot.dialog('count', function (session, args) {
@@ -79,7 +79,6 @@ bot.dialog('count', function (session, args) {
             if (tempScore > bestScore){
               bestScore = tempScore;
               bestSentence = arr[i];
-              console.log(tempScore);
             }
           }
           if(bestScore == 0){
@@ -143,10 +142,13 @@ bot.dialog('leadTelEm', function (session, args) {
     globalPost = postEntitys;
   }
 
- if( academicEntitys.length == 0 && postEntitys.length==0){
+ if( academicEntitys.length == 0 && globalAcademic != null){
     academicEntitys = globalAcademic;
+ }
+ if(postEntitys.length==0 && globalPost != null){
     postEntitys = globalPost;
  }
+
 
   fs.readFile('./data/人员数据总.csv', function (err, data) {
       var table = new Array();
@@ -160,7 +162,6 @@ bot.dialog('leadTelEm', function (session, args) {
             academicStr = academicEntitys[0].resolution.values[0].replace(/\s+/g, '');
             postStr = postEntitys[0].resolution.values[0].replace(/\s+/g, '');
             for(var i=0;i<table.length;i++){
-
               if (table[i][1] == academicStr && table[i][2] == postStr)
               {
                 if(table[i][3] != 'None' && table[i][4] != 'None'){
@@ -183,7 +184,10 @@ bot.dialog('leadTelEm', function (session, args) {
             else{
               session.send(string);
             }
-          }else{
+          }else if(academicEntitys.length == 0 ){
+           session.beginDialog("schoolLeader");
+          }
+          else{
             session.send('输入的查询信息不完整，请给我更多信息')
           }
       })
@@ -212,10 +216,14 @@ bot.dialog('leaderName', function (session, args) {
     globalPost = postEntitys;
   }
 
- if( academicEntitys.length == 0 && postEntitys.length==0){
+
+ if( academicEntitys.length == 0 && globalAcademic != null){
     academicEntitys = globalAcademic;
+ }
+ if(postEntitys.length==0 && globalPost != null){
     postEntitys = globalPost;
  }
+
 
   fs.readFile('./data/人员数据总.csv', function (err, data) {
       var table = new Array();
@@ -227,25 +235,26 @@ bot.dialog('leaderName', function (session, args) {
        ConvertToTable(data, function (table) {
           if( academicEntitys.length != 0 && postEntitys.length!=0){
             for(var i=0;i<table.length;i++){
-                console.log(academicEntitys);
-                console.log(academicEntitys[0].resolution.values[0]);
-
                 academicStr = academicEntitys[0].resolution.values[0].replace(/\s+/g, '');
                 postStr = postEntitys[0].entity.replace(/\s+/g, '');
                 if (table[i][1] == academicStr && table[i][2] == postStr)
                 {
+
                   if(table[i][0] != 'None'){
                     string = table[i][1] + "的" + table[i][2] + "是" + table[i][0];
                   }
                   else{
                     string = table[i][1] + "的" + table[i][2] + ",官网没有他的姓名信息";
                   }
-                  session.send(string);
                 }
               } 
+            if(string == ''){
+              string = "本Bot在官网没有找到" + academicStr +"这个职务的信息";
+            }
+            session.send(string);
             }
           else if(academicEntitys.length == 0 && postEntitys.length!=0){
-            session.send('您这是要查学校人员的信息吧。');
+            session.beginDialog("schoolLeader");
           }else{
             session.send("请给的信息不足，请告诉我更完整的信息");
           }
@@ -275,10 +284,15 @@ bot.dialog('leadDuty',
       globalPost = postEntitys;
     }
 
-    if( academicEntitys.length == 0 && postEntitys.length==0){
-    academicEntitys = globalAcademic;
-    postEntitys = globalPost;
-    }
+
+  if( academicEntitys.length == 0 && globalAcademic != null){
+      academicEntitys = globalAcademic;
+  }
+  if(postEntitys.length==0 && globalPost != null){
+      postEntitys = globalPost;
+  }
+
+
 
     fs.readFile('./data/人员数据总.csv', function (err, data) {
         var table = new Array();
@@ -302,18 +316,61 @@ bot.dialog('leadDuty',
                         else{
                           string = "对于" + table[i][1] + "的" + table[i][2] + ",官网没有相关的工作信息";
                         }
-                        session.send(string);
                       }
                   }
+                if(string == ''){
+                  string = "本Bot在官网没有找到" + academicStr +"这个职务的信息";
+                }
+                  session.send(string);
                 })
+        }
+        else if(academicEntitys.length == 0 && postEntitys.length!=0){
+           session.beginDialog("schoolLeader");
         }
         else {
           session.send('您给的信息不足，请告诉我更多信息，~^_^~');
         }
   }); 
-  // session.endDialog();
+  session.endDialog();
 }).triggerAction({
   matches: 'leadDuty'
+});
+
+//校级领导信息
+bot.dialog('schoolLeader',function(session,arg){
+      //获取全局变量，为了上下文。
+    var string = '';
+    var postStr = '';
+    var postEntitys = globalPost;
+    var postList;
+    globalPost = null;
+    globalAcademic = null;
+    fs.readFile('./data/华科校级领导统计.csv', function (err, data) {
+      var table = new Array();
+      if (err) {
+          console.log("error");
+          console.log(err.stack);
+          return;
+      }
+      //根据csv文件，进行匹配
+      ConvertToTable(data, function (table) {
+          for(var i=0;i<table.length;i++) {
+            postList = table[i][1].replace(/\s+/g, '').split("、");
+            for(var j=0;j<postList.length;j++){
+              postStr = postList[j];
+              if(postEntitys[0].entity.replace(/\s+/g, '') == postStr){
+              string = table[i][0] + "是HUST的" + table[i][1] + "，他的主要工作是" +table[i][2] + '，官网介绍在' + table[i][3] +'，以上是所有信息，没有联系方式。';
+              session.send(string);
+              }
+            }
+            // postStr = postEntitys[0].entity.replace(/\s+/g, '');
+            // console.log(table[i][1]);
+          }
+        });
+    });
+    session.endDialog();
+}).triggerAction({
+  matches: 'schoolLeader'
 });
 
 //校长上届问题

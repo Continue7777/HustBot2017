@@ -19,6 +19,7 @@ server.post('/api/messages', connector.listen());
 // This bot enables users to either make a dinner reservation or order dinner.
 var bot = new builder.UniversalBot(connector, function (session) {
   session.send("Hi... I'm a sample bot.");
+  console.log(fs)
 });
 
 // Add a global LUIS recognizer to the bot by using the endpoint URL of the LUIS app

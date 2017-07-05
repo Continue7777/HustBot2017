@@ -26,7 +26,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
   session.send("啥是"+session.message.text);
 });
 //bot.localePath(path.join(__dirname, './locale'));
-//
+//  
 // Make sure you add code to validate these fields
 // var luisAppId = process.env.LuisAppId;
 // var luisAPIKey = process.env.LuisAPIKey;
@@ -148,7 +148,9 @@ bot.dialog('leadTelEm', function (session, args) {
       }
       //根据csv文件，进行匹配
       ConvertToTable(data, function (table) {
-          if( academicEntitys.length != 0 && postStr.length!=0){
+          if( academicEntitys.length != 0 && postEntitys.length!=0){
+            console.log(academicEntitys.length);
+            console.log(postStr.length);
             academicStr = academicEntitys[0].resolution.values[0].replace(/\s+/g, '');
             postStr = postEntitys[0].resolution.values[0].replace(/\s+/g, '');
             for(var i=0;i<table.length;i++){

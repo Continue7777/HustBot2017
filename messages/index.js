@@ -21,9 +21,9 @@ var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure
 // var bot = new builder.UniversalBot(connector);
 var bot = new builder.UniversalBot(connector, function (session) {
   session.send("啥是"+session.message.text);
-    console.log('count question');
-    console.log(__dirname);
-    console.log(process.cwd());
+    session.send('count question');
+    session.send(__dirname);
+    session.send(process.cwd());
 });
 //bot.localePath(path.join(__dirname, './locale'));
 

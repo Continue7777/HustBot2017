@@ -25,9 +25,9 @@ var bot = new builder.UniversalBot(connector, function (session) {
   session.send("啥是"+session.message.text);
     session.send('count question');
     session.send(__dirname);
-    fs.exists(path.join(__dirname,'./data/num.txt'), function(exists) {  
+      fs.exists('./data/num.txt', function(exists) {  
     session.send(exists ? "路径对的" : "wrong");  
-}); 
+      });
 });
 //bot.localePath(path.join(__dirname, './locale'));
 

@@ -25,7 +25,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
     session.send(__dirname);
     session.send(process.cwd());
     fs.exists(path.join(__dirname,'./data/num.txt'), function(exists) {  
-    console.log(exists ? "路径对的" : "wrong");  
+    session.send(exists ? "路径对的" : "wrong");  
 }); 
 });
 //bot.localePath(path.join(__dirname, './locale'));

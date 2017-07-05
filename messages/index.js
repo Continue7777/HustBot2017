@@ -140,7 +140,7 @@ bot.dialog('leadTelEm', function (session, args) {
   var string = '';
   var academicStr = '';
   var postStr = '';
-  fs.readFile(path.join(__dirname,'./data/人员数据总.csv'), function (err, data) {
+  fs.readFile(path.join(__dirnam,'./data/人员数据总.csv'), function (err, data) {
       var table = new Array();
       if (err) {
           console.log(err.stack);
@@ -148,29 +148,35 @@ bot.dialog('leadTelEm', function (session, args) {
       }
       //根据csv文件，进行匹配
       ConvertToTable(data, function (table) {
-          console.log(academicEntitys[0].resolution)
-          for(var i=0;i<table.length;i++){
-            academicStr = academicEntitys[0].entity.replace(/\s+/g, '');
-            postStr = postEntitys[0].entity.replace(/\s+/g, '');
-            //console.log(table[i][1].match(academicStr));
-            // console.log(table[i][0]);
-            // console.log(table[i][1]);
-            if (table[i][1] == academicStr && table[i][2] == postStr)
-            {
-              if(table[i][3] != 'None' && table[i][4] != 'None'){
-                string = table[i][0] + "是" + table[i][1] + table[i][2] + ",电话是" + table[i][3] + ",邮箱是" + table[i][4];
+          if( academicEntitys.length != 0 && postStr.length!=0){
+            academicStr = academicEntitys[0].resolution.values[0].replace(/\s+/g, '');
+            postStr = postEntitys[0].resolution.values[0].replace(/\s+/g, '');
+            for(var i=0;i<table.length;i++){
+
+              if (table[i][1] == academicStr && table[i][2] == postStr)
+              {
+                if(table[i][3] != 'None' && table[i][4] != 'None'){
+                  string = table[i][0] + "是" + table[i][1] + table[i][2] + ",电话是" + table[i][3] + ",邮箱是" + table[i][4];
+                }
+                else if(table[i][3] != 'None' && table[i][4] == 'None'){
+                  string = table[i][0] + "是" + table[i][1] + table[i][2] + ",电话是" + table[i][3];
+                }
+                else if(table[i][3] == 'None' && table[i][4] != 'None'){
+                  string = table[i][0] + "是" + table[i][1] + table[i][2] + ",邮箱是" + table[i][4];
+                }              
+                else{
+                  string = table[i][0] + "是" + table[i][1] + table[i][2] + ",官网没有他的联系方式";
+                }
               }
-              else if(table[i][3] != 'None' && table[i][4] == 'None'){
-                string = table[i][0] + "是" + table[i][1] + table[i][2] + ",电话是" + table[i][3];
-              }
-              else if(table[i][3] == 'None' && table[i][4] != 'None'){
-                string = table[i][0] + "是" + table[i][1] + table[i][2] + ",邮箱是" + table[i][4];
-              }              
-              else{
-                string = table[i][0] + "是" + table[i][1] + table[i][2] + ",官网没有他的联系方式";
-              }
+            }
+            if(string == ''){
+              session.send("本Bot在官网没有找到" + academicStr +"这个职务的信息");
+            }
+            else{
               session.send(string);
             }
+          }else{
+            session.send('输入的查询信息不完整，请给我更多信息')
           }
       })
   }); 
@@ -179,6 +185,7 @@ bot.dialog('leadTelEm', function (session, args) {
 }).triggerAction({
   matches: 'leadTelEm'
 });
+
 
 
 //领导姓名问题

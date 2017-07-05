@@ -7,7 +7,7 @@ https://aka.ms/abs-node-luis
 "use strict";
 var builder = require("botbuilder");
 var botbuilder_azure = require("botbuilder-azure");
-var path = require('path');
+//var path = require('path');
 
 var useEmulator = (process.env.NODE_ENV == 'development');
 
@@ -21,8 +21,11 @@ var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure
 // var bot = new builder.UniversalBot(connector);
 var bot = new builder.UniversalBot(connector, function (session) {
   session.send("啥是"+session.message.text);
+    console.log('count question');
+    console.log(__dirname);
+    console.log(process.cwd());
 });
-bot.localePath(path.join(__dirname, './locale'));
+//bot.localePath(path.join(__dirname, './locale'));
 
 // Make sure you add code to validate these fields
 // var luisAppId = process.env.LuisAppId;

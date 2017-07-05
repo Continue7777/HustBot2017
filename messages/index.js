@@ -53,42 +53,42 @@ bot.dialog('count', function (session, args) {
     var tempScore = 0;
     var bestSentence = '';
     var data = '';
-  // 创建可读流 
-  var readerStream = fs.createReadStream('./data/num.txt');
-  // 设置编码为 utf8。
-  readerStream.setEncoding('UTF8');
-  // 处理流事件 --> data, end, and error
-  readerStream.on('data', function(sentence) {
-    data += sentence;
-    console.log(data);
-  });
-  readerStream.on('end',function(){
-    session.send('read the file already');
-    var arr = data.split('\n');
-    var tempStr = '';
-    tempScore = 0;
-    for(var i=0;i<arr.length;i++){
-      for(var j=0;j< args.intent.entities.length;j++){
-        tempStr = args.intent.entities[j].entity.replace(/\s+/g, '');
-        if(arr[i].match(tempStr) != null){
-          tempScore += 1;
-        }
-      }
+  // // 创建可读流 
+  // var readerStream = fs.createReadStream('./data/num.txt');
+  // // 设置编码为 utf8。
+  // readerStream.setEncoding('UTF8');
+  // // 处理流事件 --> data, end, and error
+  // readerStream.on('data', function(sentence) {
+  //   data += sentence;
+  //   console.log(data);
+  // });
+  // readerStream.on('end',function(){
+  //   session.send('read the file already');
+  //   var arr = data.split('\n');
+  //   var tempStr = '';
+  //   tempScore = 0;
+  //   for(var i=0;i<arr.length;i++){
+  //     for(var j=0;j< args.intent.entities.length;j++){
+  //       tempStr = args.intent.entities[j].entity.replace(/\s+/g, '');
+  //       if(arr[i].match(tempStr) != null){
+  //         tempScore += 1;
+  //       }
+  //     }
       
-      tempScore = tempScore / arr[i].length;
-      if (tempScore > bestScore){
-        bestScore = tempScore;
-        bestSentence = arr[i];
-        console.log(tempScore);
-      }
-    }
+  //     tempScore = tempScore / arr[i].length;
+  //     if (tempScore > bestScore){
+  //       bestScore = tempScore;
+  //       bestSentence = arr[i];
+  //       console.log(tempScore);
+  //     }
+  //   }
     if(bestScore == 0){
-     session.send("没有这个问题的答案");
+     session.send("无法回答您的数量询问问题");
    }else{
      session.send(bestSentence);
    }
 
- });
+
   session.endDialog();
 }).triggerAction({
   matches: 'count'

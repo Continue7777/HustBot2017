@@ -26,7 +26,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
   session.send("啥是"+session.message.text);
 });
 //bot.localePath(path.join(__dirname, './locale'));
-
+//
 // Make sure you add code to validate these fields
 // var luisAppId = process.env.LuisAppId;
 // var luisAPIKey = process.env.LuisAPIKey;

@@ -48,6 +48,9 @@ bot.recognizer(recognizer);
 //有关数量的问题
 bot.dialog('count', function (session, args) {
     // retrieve hotel name from matched entities
+    console.log('count question');
+    console.log(__dirname);
+    console.log(process.cwd());
     var Entitys = builder.EntityRecognizer.findAllEntities(args.intent.entities, 'numKey');
     var bestScore = 0;
     var tempScore = 0;

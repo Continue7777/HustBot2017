@@ -105,7 +105,7 @@ bot.dialog('count', function (session, args) {
       tempStr = '由于本Bot没有统计到各个学院的数量信息，下面给出您想了解学院的官网'+'\n';
       //获取官网列表
       var table = new Array();
-      fs.readFile('./data/website.csv', function (err, data) {
+      fs.readFile(path.join(__dirname,'./data/website.csv'), function (err, data) {
         if (err) {
             console.log(err.stack);
             return;

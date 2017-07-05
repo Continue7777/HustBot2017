@@ -75,24 +75,24 @@ bot.dialog('count', function (session, args) {
   });
   readerStream.on('end',function(){
     session.send('read the file already');
-    // var arr = data.split('\n');
-    // var tempStr = '';
-    // tempScore = 0;
-    // for(var i=0;i<arr.length;i++){
-    //   for(var j=0;j< args.intent.entities.length;j++){
-    //     tempStr = args.intent.entities[j].entity.replace(/\s+/g, '');
-    //     if(arr[i].match(tempStr) != null){
-    //       tempScore += 1;
-    //     }
-    //   }
+    var arr = data.split('\n');
+    var tempStr = '';
+    tempScore = 0;
+    for(var i=0;i<arr.length;i++){
+      for(var j=0;j< args.intent.entities.length;j++){
+        tempStr = args.intent.entities[j].entity.replace(/\s+/g, '');
+        if(arr[i].match(tempStr) != null){
+          tempScore += 1;
+        }
+      }
       
-    //   tempScore = tempScore / arr[i].length;
-    //   if (tempScore > bestScore){
-    //     bestScore = tempScore;
-    //     bestSentence = arr[i];
-    //     console.log(tempScore);
-    //   }
-    // }
+      tempScore = tempScore / arr[i].length;
+      if (tempScore > bestScore){
+        bestScore = tempScore;
+        bestSentence = arr[i];
+        console.log(tempScore);
+      }
+    }
     if(bestScore == 0){
      session.send("没有这个问题的答案");
    }else{

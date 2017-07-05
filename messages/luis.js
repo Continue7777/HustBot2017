@@ -19,16 +19,19 @@ server.post('/api/messages', connector.listen());
 // This bot enables users to either make a dinner reservation or order dinner.
 var bot = new builder.UniversalBot(connector, function (session) {
   session.send("Hi... I'm a sample bot.");
-  console.log(fs);
-      fs.exists('./data/num.txt', function(exists) {  
-    session.send(exists ? "路径对的" : "wrong");  
-      });
+  //获取全局变量，为了上下文。
+
+  globalAcademic = null;
+  globalPost = null;
 });
 
 // Add a global LUIS recognizer to the bot by using the endpoint URL of the LUIS app
 var model = 'https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/d91b5656-8a4e-46b8-a9c8-9191a56a36c8?subscription-key=6d19866f425d48cea31af49f75b289cf';
 var recognizer = new builder.LuisRecognizer(model);
 bot.recognizer(recognizer);
+
+var globalAcademic = '';
+var globalPost = '';
 
 //有关数量的问题
 bot.dialog('count', function (session, args) {
@@ -40,6 +43,16 @@ bot.dialog('count', function (session, args) {
     var bestSentence = '';
     var data = '';
     var tempStr = ''
+
+  var postEntitys = builder.EntityRecognizer.findAllEntities(args.intent.entities, 'post');
+  var academicEntitys = builder.EntityRecognizer.findAllEntities(args.intent.entities, 'academic');
+  //获取全局变量，为了上下文。
+  if(academicEntitys.length!=0){
+    globalAcademic = null;
+  }
+  if(postEntitys.length!=0){
+    globalPost = null;
+  }
     //如果不是问的学校有关的信息，返回学院的官网
     if(academicEntitys.length ==0)
     {
@@ -122,6 +135,19 @@ bot.dialog('leadTelEm', function (session, args) {
   var string = '';
   var academicStr = '';
   var postStr = '';
+  //获取全局变量，为了上下文。
+  if(academicEntitys.length!=0){
+    globalAcademic = academicEntitys;
+  }
+  if(postEntitys.length!=0){
+    globalPost = postEntitys;
+  }
+
+ if( academicEntitys.length == 0 && postEntitys.length==0){
+    academicEntitys = globalAcademic;
+    postEntitys = globalPost;
+ }
+
   fs.readFile('./data/人员数据总.csv', function (err, data) {
       var table = new Array();
       if (err) {
@@ -130,8 +156,6 @@ bot.dialog('leadTelEm', function (session, args) {
       }
       //根据csv文件，进行匹配
       ConvertToTable(data, function (table) {
-          console.log(academicEntitys.length);
-          console.log(postStr.length);
           if( academicEntitys.length != 0 && postEntitys.length!=0){
             academicStr = academicEntitys[0].resolution.values[0].replace(/\s+/g, '');
             postStr = postEntitys[0].resolution.values[0].replace(/\s+/g, '');
@@ -179,6 +203,20 @@ bot.dialog('leaderName', function (session, args) {
   var string = '';
   var academicStr = '';
   var postStr = '';
+
+  //获取全局变量，为了上下文。
+  if(academicEntitys.length!=0){
+    globalAcademic = academicEntitys;
+  }
+  if(postEntitys.length!=0){
+    globalPost = postEntitys;
+  }
+
+ if( academicEntitys.length == 0 && postEntitys.length==0){
+    academicEntitys = globalAcademic;
+    postEntitys = globalPost;
+ }
+
   fs.readFile('./data/人员数据总.csv', function (err, data) {
       var table = new Array();
       if (err) {
@@ -194,9 +232,6 @@ bot.dialog('leaderName', function (session, args) {
 
                 academicStr = academicEntitys[0].resolution.values[0].replace(/\s+/g, '');
                 postStr = postEntitys[0].entity.replace(/\s+/g, '');
-                //console.log(table[i][1].match(academicStr));
-                // console.log(table[i][0]);
-                // console.log(table[i][1]);
                 if (table[i][1] == academicStr && table[i][2] == postStr)
                 {
                   if(table[i][0] != 'None'){
@@ -222,6 +257,72 @@ bot.dialog('leaderName', function (session, args) {
   matches: 'leaderName'
 });
 
+//领导负责工作问题
+bot.dialog('leadDuty', 
+  function (session, args) {
+    // retrieve hotel name from matched entities
+    var postEntitys = builder.EntityRecognizer.findAllEntities(args.intent.entities, 'post');
+    var academicEntitys = builder.EntityRecognizer.findAllEntities(args.intent.entities, 'academic');
+    var string = '';
+    var academicStr = '';
+    var postStr = '';
+
+    //获取全局变量，为了上下文。
+    if(academicEntitys.length!=0){
+      globalAcademic = academicEntitys;
+    }
+    if(postEntitys.length!=0){
+      globalPost = postEntitys;
+    }
+
+    if( academicEntitys.length == 0 && postEntitys.length==0){
+    academicEntitys = globalAcademic;
+    postEntitys = globalPost;
+    }
+
+    fs.readFile('./data/人员数据总.csv', function (err, data) {
+        var table = new Array();
+        if (err) {
+            console.log("error");
+            console.log(err.stack);
+            return;
+        }
+        //根据csv文件，进行匹配
+        if (academicEntitys.length && postEntitys.length) {
+              ConvertToTable(data, function (table) {
+                  for(var i=0;i<table.length;i++) {
+                      academicStr = academicEntitys[0].resolution.values[0].replace(/\s+/g, '');
+                      postStr = postEntitys[0].entity.replace(/\s+/g, '');
+                      if (table[i][1] == academicStr && table[i][2] == postStr)
+                      {
+                        if(!table[i][5].match('None')){
+                          console.log(table[i][5]);
+                          string = table[i][1] + "的" + table[i][2] + "主要负责" + table[i][5];
+                        }
+                        else{
+                          string = "对于" + table[i][1] + "的" + table[i][2] + ",官网没有相关的工作信息";
+                        }
+                        session.send(string);
+                      }
+                  }
+                })
+        }
+        else {
+          session.send('您给的信息不足，请告诉我更多信息，~^_^~');
+        }
+  }); 
+  // session.endDialog();
+}).triggerAction({
+  matches: 'leadDuty'
+});
+
+//校长上届问题
+bot.dialog('schoolmaster', function (session, args) {
+  session.send('前任信息');
+  session.endDialog();
+}).triggerAction({
+  matches: /前任/
+});
 
 function ConvertToTable(data, callBack) {
     data = data.toString();

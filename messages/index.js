@@ -60,8 +60,10 @@ bot.dialog('count', function (session, args) {
   // 处理流事件 --> data, end, and error
   readerStream.on('data', function(sentence) {
     data += sentence;
+    console.log(data);
   });
   readerStream.on('end',function(){
+    session.send('read the file already');
     var arr = data.split('\n');
     var tempStr = '';
     tempScore = 0;

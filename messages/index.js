@@ -9,6 +9,9 @@ var builder = require("botbuilder");
 var botbuilder_azure = require("botbuilder-azure");
 var fs = require("fs");
 var path = require("path");
+var globalAcademic = '';
+var globalPost = '';
+
 
 var useEmulator = (process.env.NODE_ENV == 'development');
 

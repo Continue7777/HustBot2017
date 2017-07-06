@@ -549,9 +549,11 @@ bot.dialog('schoolmaster', function (session, args) {
           session.send(bossList[bossList.length-globalBossNum-1]);
       }else{
           session.send('哪来的这么多任。。');
+              globalBossNum = 0;
       }
   }else{
     session.send('本Bot只自己去爬了本校历任校长的信息，其他的往届信息木有找到哎~');
+    globalBossNum = 0;
 }
 }
 return;
@@ -565,14 +567,17 @@ if(postEntitys.length != 0 && postEntitys[0].entity.replace(/\s+/g, '') == '校�
       session.send(bossList[bossList.length-globalBossNum-1]);
   }else{
       session.send('哪来的这么多任。。');
+          globalBossNum = 0;
   }
 }
 else{
   session.send('本Bot只自己去爬了本校历任校长的信息，其他的往届信息木有找到哎~');
+      globalBossNum = 0;
 }
 
 }else{
   session.send('本Bot只自己去爬了本校历任校长的信息，其他的往届信息木有找到哎~');
+      globalBossNum = 0;
 }
 
 session.endDialog();

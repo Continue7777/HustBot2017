@@ -23,6 +23,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
 
   globalAcademic = null;
   globalPost = null;
+  globalBossNum = 0;
 });
 
 // Add a global LUIS recognizer to the bot by using the endpoint URL of the LUIS app
@@ -32,6 +33,7 @@ bot.recognizer(recognizer);
 
 var globalAcademic = null;
 var globalPost = null;
+var globalBossNum = 0;
 
 //有关数量的问题
 bot.dialog('count', function (session, args) {
@@ -53,6 +55,7 @@ bot.dialog('count', function (session, args) {
   if(postEntitys.length!=0){
     globalPost = null;
   }
+    globalBossNum = 0;
     //如果不是问的学校有关的信息，返回学院的官网
     if(academicEntitys.length ==0)
     {
@@ -132,6 +135,7 @@ bot.dialog('leadTelEm', function (session, args) {
   var string = '';
   var academicStr = '';
   var postStr = '';
+    globalBossNum = 0;
   //获取全局变量，为了上下文。
   if(academicEntitys.length!=0){
     globalAcademic = academicEntitys;
@@ -205,7 +209,7 @@ bot.dialog('leaderName', function (session, args) {
   var string = '';
   var academicStr = '';
   var postStr = '';
-
+  globalBossNum = 0;
   //获取全局变量，为了上下文。
   if(academicEntitys.length!=0){
     globalAcademic = academicEntitys;
@@ -273,7 +277,7 @@ bot.dialog('leadDuty',
     var string = '';
     var academicStr = '';
     var postStr = '';
-
+  globalBossNum = 0;
     //获取全局变量，为了上下文。
     if(academicEntitys.length!=0){
       globalAcademic = academicEntitys;
@@ -341,42 +345,114 @@ bot.dialog('schoolLeader',function(session,arg){
     var postStr = '';
     var postEntitys = globalPost;
     var postList;
-    globalPost = null;
-    globalAcademic = null;
-    fs.readFile('./data/华科校级领导统计.csv', function (err, data) {
-      var table = new Array();
-      if (err) {
-          console.log("error");
-          console.log(err.stack);
-          return;
-      }
-      //根据csv文件，进行匹配
-      ConvertToTable(data, function (table) {
-          for(var i=0;i<table.length;i++) {
-            postList = table[i][1].replace(/\s+/g, '').split("、");
-            for(var j=0;j<postList.length;j++){
-              postStr = postList[j];
-              if(postEntitys[0].entity.replace(/\s+/g, '') == postStr){
-              string = table[i][0] + "是HUST的" + table[i][1] + "，他的主要工作是" +table[i][2] + '，官网介绍在' + table[i][3] +'，以上是所有信息，没有联系方式。';
-              session.send(string);
-              }
+      globalBossNum = 0;
+    if(postEntitys.length!=0){
+      fs.readFile('./data/华科校级领导统计.csv', function (err, data) {
+            var table = new Array();
+            if (err) {
+                console.log("error");
+                console.log(err.stack);
+                return;
             }
-            // postStr = postEntitys[0].entity.replace(/\s+/g, '');
-            // console.log(table[i][1]);
-          }
-        });
-    });
+            //根据csv文件，进行匹配
+            ConvertToTable(data, function (table) {
+                for(var i=0;i<table.length;i++) {
+                  postList = table[i][1].replace(/\s+/g, '').split("、");
+                  for(var j=0;j<postList.length;j++){
+                    postStr = postList[j];
+                    if(postEntitys[0].entity.replace(/\s+/g, '') == postStr){
+                    string = table[i][0] + "是HUST的" + table[i][1] + "，他的主要工作是" +table[i][2] + '，官网介绍在' + table[i][3] +'，以上是所有信息，没有联系方式。';
+                    session.send(string);
+                    }
+                  }
+                  // postStr = postEntitys[0].entity.replace(/\s+/g, '');
+                  // console.log(table[i][1]);
+                }
+              });
+          });
+    }else{
+      session.send('貌似回答不了');
+    }
+    
     session.endDialog();
 }).triggerAction({
   matches: 'schoolLeader'
 });
 
+//官网信息
+bot.dialog('websiteInfo',function(session,args){
+    var websiteEntitys = builder.EntityRecognizer.findAllEntities(args.intent.entities, 'websitesKey');
+    var academicEntitys = builder.EntityRecognizer.findAllEntities(args.intent.entities, 'academic');
+    var flag=true;
+      globalBossNum = 0;
+    if(websiteEntitys.length!=0 ||academicEntitys.length!=0){
+      var table = new Array();
+      fs.readFile('./data/hust-websites.csv', function (err, data) {
+        if (err) {
+            console.log(err.stack);
+            return;
+        }
+        //根据csv文件，进行匹配
+        ConvertToTable(data, function (table) {
+          for(var i=0;i<table.length;i++){
+            if(academicEntitys.length!=0){
+              for(var j=0;j<academicEntitys.length;j++)
+              {
+                if(table[i][0] == academicEntitys[j].resolution.values[0].replace(/\s+/g, '')){
+                  session.send(table[i][0] +'的官网是'+table[i][1]);
+                  flag = false;
+                }
+              }
+            }
+            if(websiteEntitys.length!=0){
+              for(var j=0;j<websiteEntitys.length;j++){
+                if(table[i][0] == websiteEntitys[j].resolution.values[0].replace(/\s+/g, '')){
+                session.send(table[i][0] +'的官网是'+table[i][1]);
+                flag = false;
+                }
+              }
+            }
+
+          }
+          if(flag == true){
+            session.send("不好意思没有查到改信息的官网，所以不能给您提供信息了（逃");
+          }
+        }); 
+      });
+    } 
+    session.endDialog();
+}).triggerAction({
+  matches: 'websiteInfo'
+});
+
 //校长上届问题
 bot.dialog('schoolmaster', function (session, args) {
-  session.send('前任信息');
+  var numEntitys = builder.EntityRecognizer.findAllEntities(args.intent.entities, 'num');
+  var postEntitys = builder.EntityRecognizer.findAllEntities(args.intent.entities, 'post');
+  var bossList = ['查谦','朱九思','吴再德','薛德麟','黄树槐','杨叔子','周济','樊明武','李培根','丁烈云']
+  var consours = 0;
+  if( postEntitys[0].entity.replace(/\s+/g, '') == '校长'){
+      console.log(postEntitys);
+       globalBossNum += parseInt(numEntitys[0].resolution.values[0]);
+      if(globalPost != null){
+          console.log(globalBossNum);
+        if( globalPost[0].entity.replace(/\s+/g, '' == '校长')){
+            if(bossList.length-globalBossNum-1 >=0){
+              session.send(bossList[bossList.length-globalBossNum-1]);
+            }else{
+              session.send('哪来的这么多任。。');
+            }
+        }else{
+          session.send('本Bot只自己去爬了本校历任校长的信息，其他的往届信息木有找到哎~');
+        }
+      }
+  }else{
+      session.send('本Bot只自己去爬了本校历任校长的信息，其他的往届信息木有找到哎~');
+  }
+ 
   session.endDialog();
 }).triggerAction({
-  matches: /前任/
+  matches: 'bossList' 
 });
 
 function ConvertToTable(data, callBack) {

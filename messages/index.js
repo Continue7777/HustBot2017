@@ -271,10 +271,12 @@ bot.dialog('leaderName', function (session, args) {
   if(academicEntitys.length!=0){
     globalAcademic = academicEntitys;
 }
-if(postEntitys.length!=0){
-    globalPost = postEntitys;
-}
-
+    if(academicEntitys.length!=0){
+      globalAcademic = academicEntitys;
+  }
+  if(postEntitys.length!=0){
+      globalPost = postEntitys;
+  }
 
 if( academicEntitys.length == 0 && globalAcademic != null){
     academicEntitys = globalAcademic;

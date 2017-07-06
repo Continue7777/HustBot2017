@@ -34,7 +34,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
   globalBossNum = 0;
 });
 
-var model = 'https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/d91b5656-8a4e-46b8-a9c8-9191a56a36c8?subscription-key=6d19866f425d48cea31af49f75b289cf';
+var model = 'https://southeastasia.api.cognitive.microsoft.com/luis/v2.0/apps/d91b5656-8a4e-46b8-a9c8-9191a56a36c8?subscription-key=693a2ab893a84581b86076b849d6da96';
 var recognizer = new builder.LuisRecognizer(model);
 bot.recognizer(recognizer);
 
@@ -268,9 +268,7 @@ bot.dialog('leaderName', function (session, args) {
     var postStr = '';
     globalBossNum = 0;
   //获取全局变量，为了上下文。
-  if(academicEntitys.length!=0){
-    globalAcademic = academicEntitys;
-}
+
     if(academicEntitys.length!=0){
       globalAcademic = academicEntitys;
   }

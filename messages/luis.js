@@ -18,7 +18,9 @@ var connector = new builder.ChatConnector({
 server.post('/api/messages', connector.listen());
 // This bot enables users to either make a dinner reservation or order dinner.
 var bot = new builder.UniversalBot(connector, function (session) {
-  session.send("你好，我是HUST Bot ,我还很蠢，不要问有难度的问题，好不啦~ ^_^");
+
+  session.send('hello');
+
   //获取全局变量，为了上下文。
 
   globalAcademic = null;
@@ -454,6 +456,45 @@ bot.dialog('schoolmaster', function (session, args) {
 }).triggerAction({
   matches: 'bossList' 
 });
+
+//None,固定问答对
+bot.dialog('None',function(session,args){
+ var noneKeyEntitys = builder.EntityRecognizer.findAllEntities(args.intent.entities, 'noneKey');
+ console.log(args.intent);
+  var data = '';
+  if(noneKeyEntitys.length == 0){
+    session.send("你好，我是HUST Bot ,我还很蠢，不要问有难度的问题，好不啦~ ^_^");
+  }else{
+      // 创建可读流 
+        var readerStream = fs.createReadStream('./data/常见问题对.csv');
+        // 设置编码为 utf8。
+        readerStream.setEncoding('UTF8');
+        // 处理流事件 --> data, end, and error
+        readerStream.on('data', function(sentence) {
+          data += sentence;
+        });
+        readerStream.on('end',function(){
+          var arr = data.split('\n');
+          var qna;
+          for(var i=0;i<arr.length;i++){
+            qna = arr[i].split(' ');
+            for(var j=0;j<noneKeyEntitys.length;j++){
+              if(noneKeyEntitys[j].resolution.values[0].replace(/\s+/g, '') == qna[0]){
+                  session.send(qna[1]);
+                  break;
+              }
+            }
+          }
+        });
+  globalAcademic = null;
+  globalPost = null;
+  globalBossNum = 0;
+}
+session.endDialog();
+}).triggerAction({
+  matches: 'None' 
+});
+
 
 function ConvertToTable(data, callBack) {
     data = data.toString();

@@ -589,7 +589,7 @@ bot.dialog('None',function(session,args){
     session.send("你好，我是HUST Bot ,我还很蠢，不要问有难度的问题，好不啦~ ^_^");
 }else{
       // 创建可读流 
-      var readerStream = fs.createReadStream(path.join(__dirname,'./data/常见问题对.csv');
+      var readerStream = fs.createReadStream(path.join(__dirname,'./data/常见问题对.csv'));
         // 设置编码为 utf8。
         readerStream.setEncoding('UTF8');
         // 处理流事件 --> data, end, and error

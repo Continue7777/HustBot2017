@@ -26,7 +26,7 @@ var bot = new builder.UniversalBot(connector, function (session) {
 });
 
 // Add a global LUIS recognizer to the bot by using the endpoint URL of the LUIS app
-var model = 'https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/d91b5656-8a4e-46b8-a9c8-9191a56a36c8?subscription-key=6d19866f425d48cea31af49f75b289cf';
+var model = 'https://southeastasia.api.cognitive.microsoft.com/luis/v2.0/apps/d91b5656-8a4e-46b8-a9c8-9191a56a36c8?subscription-key=693a2ab893a84581b86076b849d6da96';
 var recognizer = new builder.LuisRecognizer(model);
 bot.recognizer(recognizer);
 
@@ -99,7 +99,7 @@ bot.dialog('count', function (session, args) {
       tempStr = '由于本Bot没有统计到各个学院的数量信息，下面给出您想了解学院的官网'+'\n';
       //获取官网列表
       var table = new Array();
-      fs.readFile('./data/website.csv', function (err, data) {
+      fs.readFile('./data/hust-websites.csv', function (err, data) {
         if (err) {
             console.log(err.stack);
             return;
@@ -108,9 +108,7 @@ bot.dialog('count', function (session, args) {
         ConvertToTable(data, function (table) {
           for(var i=0;i<academicEntitys.length;i++){
             tempStr += academicEntitys[i].resolution.values[0].replace(/\s+/g, '') + "的官网是：";
-            console.log(table+"1");
             for(var j=0;j<table.length;j++){
-              console.log(table[0][0]);
               if(academicEntitys[i].resolution.values[0].replace(/\s+/g, '') == table[j][0]){
                 tempStr += table[j][1];
               }

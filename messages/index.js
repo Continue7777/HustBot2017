@@ -380,8 +380,9 @@ bot.dialog('leadDuty',
         return;
     }
         //根据csv文件，进行匹配
-        if (academicEntitys.length && postEntitys.length) {
+       
           ConvertToTable(data, function (table) {
+             if (academicEntitys.length && postEntitys.length) {
               for(var i=0;i<table.length;i++) {
                   academicStr = academicEntitys[0].resolution.values[0].replace(/\s+/g, '');
                   postStr = postEntitys[0].entity.replace(/\s+/g, '');
@@ -411,7 +412,7 @@ bot.dialog('leadDuty',
           string = "本Bot在官网没有找到" + academicStr +"这个职务的信息";
       }
       session.send(string);
-  })
+
       }
       else if(academicEntitys.length == 0 && postEntitys.length !=0){
          academicStr = '学校';
@@ -441,6 +442,7 @@ bot.dialog('leadDuty',
 else {
   session.send('您给的信息不足，请告诉我更多信息，~^_^~');
 }
+  })
 }); 
   session.endDialog();
 }).triggerAction({
